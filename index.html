@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Advanced Chat App</title>
+  <style>
+    body { font-family: Arial; background: #f4f4f4; }
+    #chat { max-width: 600px; margin: auto; background: white; padding: 10px; border-radius: 10px; }
+    #messages { list-style: none; padding: 0; height: 400px; overflow-y: auto; }
+    #messages li { padding: 5px; border-bottom: 1px solid #ddd; }
+    #form { display: flex; margin-top: 10px; }
+    #input { flex: 1; padding: 10px; }
+    button { padding: 10px; background: blue; color: white; border: none; }
+  </style>
+</head>
+<body>
+
+<div id="chat">
+  <h2>💬 Chat Room</h2>
+  <ul id="messages"></ul>
+  <form id="form">
+    <input id="input" autocomplete="off" placeholder="Type message..." />
+    <button>Send</button>
+  </form>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+
+  let username = prompt("Enter your name:");
+  if (!username) username = "Anonymous";
+
+  socket.emit("join", username);
+
+  const form = document.getElementById("form");
+  const input = document.getElementById("input");
+  const messages = document.getElementById("messages");
+
+  form.addEventListener("submit", function(e) {
+    e.preventDefault();
+    if (input.value) {
+      socket.emit("chat message", input.value);
+      input.value = "";
+    }
+  });
+
+  socket.on("chat message", function(msg) {
+    const item = document.createElement("li");
+    item.innerHTML = `<strong>${msg.user}</strong> [${msg.time}]: ${msg.text}`;
+    messages.appendChild(item);
+    messages.scrollTop = messages.scrollHeight;
+  });
+</script>
+
+</body>
+</html>
